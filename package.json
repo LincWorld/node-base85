@@ -1,0 +1,19 @@
+{
+  "name": "base85",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test --timeout 20s && istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec"
+  },
+  "author": "afzaalace",
+  "license": "MIT",
+  "devDependencies": {
+    "assert": "^1.3.0",
+    "coveralls": "^2.11.9",
+    "istanbul": "^0.4.3",
+    "mocha": "^2.4.5",
+    "mocha-lcov-reporter": "^1.2.0",
+    "should": "^8.3.1"
+  }
+}
