@@ -1,9 +1,9 @@
-module.exports = (function(Base85) {
+module.exports = (function (Base85) {
 	let DEFAULT_CHARACTER_SET =
 		"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?@^_`{|}~";
 	let s, val, Base85Chars;
 
-	Base85.encode = function(integer) {
+	Base85.encode = function (integer) {
 		//Send integer as string if bigger than 2^53
 		if (typeof f != "bigint") {
 			integer = BigInt(integer);
@@ -16,9 +16,9 @@ module.exports = (function(Base85) {
 		return s !== "" ? s : "0";
 	};
 
-	Base85.encodeSigned = function(bytes) {
-		if (bytes % 4 != 0) {
-			throw Error("Signed values can only be in multiple of 4 bytes");
+	Base85.encodeSigned = function (bytes) {
+		if ((Math.log(bytes) / Math.log(2)) % 1 !== 0) {
+			throw Error("Signed values can only be in powers of 2 bytes");
 		}
 		let MSB = "0x80",
 			SUB = "0x100";
@@ -29,7 +29,7 @@ module.exports = (function(Base85) {
 		let PAD = SUB;
 		SUB = BigInt(SUB);
 		MSB = BigInt(MSB);
-		return function(integer, padding = true) {
+		return function (integer, padding = true) {
 			//Send integer as string if bigger than 2^53
 			if (typeof f != "bigint") {
 				integer = BigInt(integer);
@@ -44,7 +44,9 @@ module.exports = (function(Base85) {
 				integer = integer + SUB;
 			}
 			if (padding) {
-				let l = (bytes / 4) * 5;
+				let l = Math.ceil(
+					Math.log(Math.pow(256, bytes)) / Math.log(parseInt(Base85.indexLength))
+				);
 				return (PAD + Base85.encode(integer)).substr(-l, l);
 			} else {
 				return Base85.encode(integer);
@@ -52,10 +54,10 @@ module.exports = (function(Base85) {
 		};
 	};
 
-	Base85.decode = function(Base85String) {
+	Base85.decode = function (Base85String) {
 		val = BigInt(0);
 		Base85Chars = Base85String.split("").reverse();
-		Base85Chars.forEach(function(character, index) {
+		Base85Chars.forEach(function (character, index) {
 			val +=
 				BigInt(Base85.characterSet.indexOf(character)) *
 				Base85.indexLength ** BigInt(index);
@@ -63,9 +65,9 @@ module.exports = (function(Base85) {
 		return val;
 	};
 
-	Base85.decodeSigned = function(bytes) {
-		if (bytes % 4 !== 0) {
-			throw Error("Signed values can only be in multiple of 4 bytes");
+	Base85.decodeSigned = function (bytes) {
+		if ((Math.log(bytes) / Math.log(2)) % 1 !== 0) {
+			throw Error("Signed values can only be in powers of 2 bytes");
 		}
 		let MSB = "0x80",
 			SUB = "0x100";
@@ -76,7 +78,7 @@ module.exports = (function(Base85) {
 		SUB = BigInt(SUB);
 		MSB = BigInt(MSB);
 		//let SUB = 0x100 << ((bytes-1)*8);
-		return function(Base85String) {
+		return function (Base85String) {
 			val = Base85.decode(Base85String);
 			//https://stackoverflow.com/a/13468626
 			if (val >= SUB) {
@@ -91,11 +93,11 @@ module.exports = (function(Base85) {
 		};
 	};
 
-	Base85.setCharacterSet = function(chars) {
+	Base85.setCharacterSet = function (chars) {
 		let arrayOfChars = chars.split(""),
 			uniqueCharacters = [];
 
-		arrayOfChars.forEach(function(char) {
+		arrayOfChars.forEach(function (char) {
 			if (!~uniqueCharacters.indexOf(char)) {
 				uniqueCharacters.push(char);
 			} else {
@@ -108,4 +110,4 @@ module.exports = (function(Base85) {
 
 	Base85.setCharacterSet(DEFAULT_CHARACTER_SET);
 	return Base85;
-}({}));
+})({});
